@@ -212,7 +212,6 @@ function log(str) {
 harvest(api.href).catch(function(err) {
   if (err.name === "httpStatusException") {
     console.log(colors.red(err.message));
-    process.exit();
-  }
-  throw err;
+  } else console.log(err);
+  process.exit();
 });
