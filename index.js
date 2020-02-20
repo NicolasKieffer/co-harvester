@@ -135,25 +135,17 @@ function harvest(target) {
       let scrollId = res.headers.get("scroll-id"),
         count = +res.headers.get("x-result-count"),
         total = +res.headers.get("x-total-count");
-      return res
-        .json()
-        .then(function(data) {
-          if (!program.scroll) return console.log(data);
-          else {
-            log("Harvesting API...");
-            if (!program.quiet) mainProgress.start(total, count);
-            result = result.concat(data);
-            return _scroll(scrollId, count).catch(function(err) {
-              throw err;
-            });
-          }
-        })
-        .catch(function(err) {
-          throw err;
-        });
-    })
-    .catch(function(err) {
-      throw err;
+      return res.json().then(function(data) {
+        if (!program.scroll) return console.log(data);
+        else {
+          log("Harvesting API...");
+          if (!program.quiet) mainProgress.start(total, count);
+          result = result.concat(data);
+          return _scroll(scrollId, count).catch(function(err) {
+            throw err;
+          });
+        }
+      });
     });
 }
 
@@ -168,26 +160,18 @@ function _scroll(scrollId, previousCount = 0) {
         count = previousCount + +res.headers.get("x-result-count"),
         total = +res.headers.get("x-total-count");
       if (!program.quiet) mainProgress.update(count);
-      return res
-        .json()
-        .then(function(data) {
-          result = result.concat(data);
-          if (total > count) return _scroll(id, count);
-          else {
-            if (!program.quiet) mainProgress.stop();
-            log("done.");
-            let data = JSON.stringify(result);
-            if (typeof outputFormat[format] === "function")
-              data = outputFormat[format](result, criteria);
-            return writeResult(output, data);
-          }
-        })
-        .catch(function(err) {
-          throw err;
-        });
-    })
-    .catch(function(err) {
-      throw err;
+      return res.json().then(function(data) {
+        result = result.concat(data);
+        if (total > count) return _scroll(id, count);
+        else {
+          if (!program.quiet) mainProgress.stop();
+          log("done.");
+          let data = JSON.stringify(result);
+          if (typeof outputFormat[format] === "function")
+            data = outputFormat[format](result, criteria);
+          return writeResult(output, data);
+        }
+      });
     });
 }
 
@@ -195,9 +179,12 @@ function checkStatus(res) {
   if (res.status >= 200 && res.status < 300) {
     return res;
   } else {
-    let msg = "API respond with status " + res.status;
-    console.log(colors.red(msg));
-    throw new Error(msg);
+    let err = new Error("httpStatusException");
+    err.name = "httpStatusException";
+    err.status = res.status;
+    err.message = "API respond with status " + res.status;
+    err.res = res;
+    throw err;
   }
 }
 
@@ -222,4 +209,10 @@ function log(str) {
   if (!program.quiet) console.log(str);
 }
 
-harvest(api.href);
+harvest(api.href).catch(function(err) {
+  if (err.name === "httpStatusException") {
+    console.log(colors.red(err.message));
+    process.exit();
+  }
+  throw err;
+});
