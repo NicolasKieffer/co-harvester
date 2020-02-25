@@ -13,14 +13,8 @@ const fetch = require("node-fetch"),
   colors = require("colors/safe");
 
 program
-  .requiredOption(
-    "--query <query>",
-    colors.yellow(colors.bold("required")) + "   conditor query"
-  )
-  .option(
-    "--token <token>",
-    colors.gray(colors.bold("optionnal")) + "  authentication token"
-  )
+  .requiredOption("--query <query>", colors.yellow(colors.bold("required")) + "   conditor query")
+  .option("--token <token>", colors.gray(colors.bold("optionnal")) + "  authentication token")
   .option("--scroll", colors.gray(colors.bold("optionnal")) + "  scroll mode")
   .option(
     "--criteria <criteria>",
@@ -30,24 +24,13 @@ program
   .option(
     "--format <object|array|list>",
 
-    colors.gray(colors.bold("optionnal")) +
-      "  format used to modify structure of API results"
+    colors.gray(colors.bold("optionnal")) + "  format used to modify structure of API results"
   )
-  .option(
-    "--output <output>",
-    colors.gray(colors.bold("optionnal")) + "  output file path",
-    "./scroll.out"
-  )
+  .option("--output <output>", colors.gray(colors.bold("optionnal")) + "  output file path", "./scroll.out")
   .option("--quiet", colors.gray(colors.bold("optionnal")) + "  quiet mode")
   .on("--help", function() {
     console.log("");
-    console.log(
-      colors.green(
-        colors.bold(
-          "Usages exemples: https://github.com/conditor-project/co-harvester"
-        )
-      )
-    );
+    console.log(colors.green(colors.bold("Usages exemples: https://github.com/conditor-project/co-harvester")));
     console.log("");
     console.log(
       colors.green(
@@ -61,10 +44,7 @@ program
   .parse(process.argv);
 
 // create a new progress bar instance and use shades_classic theme
-const mainProgress = new cliProgress.SingleBar(
-  {},
-  cliProgress.Presets.shades_classic
-);
+const mainProgress = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 
 let query = program.query,
   api = new URL(query),
@@ -77,8 +57,7 @@ let query = program.query,
     object: function(data, criteria, stringify = true) {
       let result = {};
       for (var i = 0; i < data.length; i++) {
-        if (typeof result[data[i][criteria]] === "undefined")
-          result[data[i][criteria]] = [];
+        if (typeof result[data[i][criteria]] === "undefined") result[data[i][criteria]] = [];
         result[data[i][criteria]].push(data[i]);
       }
       if (stringify) return JSON.stringify(result);
@@ -101,11 +80,7 @@ let query = program.query,
   };
 
 if (typeof format !== "undefined" && typeof outputFormat[format] !== "function")
-  throw new Error(
-    colors.red(
-      "invalid --format. Available values are: object OR array OR list"
-    )
-  );
+  throw new Error(colors.red("invalid --format. Available values are: object OR array OR list"));
 
 // Token initialisation
 if (!token) {
@@ -167,8 +142,7 @@ function _scroll(scrollId, previousCount = 0) {
           if (!program.quiet) mainProgress.stop();
           log("done.");
           let data = JSON.stringify(result);
-          if (typeof outputFormat[format] === "function")
-            data = outputFormat[format](result, criteria);
+          if (typeof outputFormat[format] === "function") data = outputFormat[format](result, criteria);
           return writeResult(output, data);
         }
       });
@@ -198,10 +172,7 @@ function writeResult(output, data, callback) {
 }
 
 function buildScrollUrl(scrollId) {
-  let result =
-    url.resolve(api.href.split("records")[0], "scroll/" + scrollId) +
-    "?access_token=" +
-    token;
+  let result = url.resolve(api.href.split("records")[0], "scroll/" + scrollId) + "?access_token=" + token;
   return result;
 }
 
