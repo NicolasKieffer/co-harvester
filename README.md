@@ -89,3 +89,12 @@ Récupérer le nombre de documents ayant un doi ([aggrégations](https://github.
 node index.js --query="http://localhost:63332/v1/records?q=%22doi:*%22&aggs=cardinality:doi.normalized&page_size=0"
 ```
 
+## Script ##
+
+### scrollToCSV.js ###
+
+Construire un fichier CSV à partir du résultat d'un scroll (JSON renvoyé par l'API)
+
+```bash
+node scripts/scrollToCSV.js --input scroll.out --fields "sourceUid,idConditor,duplicates.source,duplicates.idConditor,nearDuplicates.source,nearDuplicates.idConditor,nearDuplicatesDetectedBySimilarity.source,nearDuplicatesDetectedBySimilarity.idConditor,idChain" > scroll.csv
+```
