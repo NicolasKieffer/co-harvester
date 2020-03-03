@@ -17,7 +17,7 @@ Le token d'authentification est nécessaire pour pouvoir accèder à l'API Condi
 export CONDITOR_TOKEN="myToken";
 # pass variable to process node
 env CONDITOR_TOKEN="myToken" node index.js
-node index.js --token="myToken"
+node index.js --token="myToken" --query="http://api.conditor.fr/v1/records?q=%22*%22"
 # set token into conditor query url
 node index.js  --query="http://api.conditor.fr/v1/records?q=%22*%22&access_token=myToken"
 ```
@@ -43,14 +43,17 @@ Consultez [la documentation de l'API](https://github.com/conditor-project/api) p
 --output --criteria --format
 ```
 
-Le paramètre `output` permet de définir le chemin du fichier de sortie. Par défaut : `"./output.txt"`
+Le paramètre `output` permet de définir le chemin du fichier de sortie. Par défaut : `"./scroll.out"`
 
 ```bash
 --output="myPath" # Chemin du fichier de sortie.
 ```
 
-Il est possible de formater les données en utilisant : `--format` et `--criteria`.
+***Note : Il est recommandé d'utiliser la sortie brute de l'API puis de manipuler les données avec ses propres scripts.***
+***Ces fonctionnalités ne peuvent pas traiter de gros volumes de données, il est donc conseillé de limiter les données renvoyées par l'API grâce aux paramètres includes/excludes*** 
+
 Par défaut, le résultat brut de l'API est renvoyé par le harvester.
+Il est possible d'eefectuer de simple reformatage avec les options : `--format` et `--criteria`.
 
 Le paramètre `criteria` doit obligatoirement être [une des valeurs suivantes](https://github.com/conditor-project/api/blob/master/doc/recordFields.md)
 
@@ -94,6 +97,8 @@ node index.js --query="http://localhost:63332/v1/records?q=%22doi:*%22&aggs=card
 ### scrollToCSV.js ###
 
 Construire un fichier CSV à partir du résultat d'un scroll (JSON renvoyé par l'API)
+
+***Génère une ligne par document puis une ligne supplémentaire pour chacun de ses duplicates/nearDuplicates/nearDuplicatesDetectedBySimilarity***
 
 ```bash
 node scripts/scrollToCSV.js --input scroll.out --fields "sourceUid,idConditor,duplicates.source,duplicates.idConditor,nearDuplicates.source,nearDuplicates.idConditor,nearDuplicatesDetectedBySimilarity.source,nearDuplicatesDetectedBySimilarity.idConditor,idChain" > scroll.csv
