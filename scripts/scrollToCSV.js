@@ -63,7 +63,8 @@ function formatValues(data, nbLines) {
   for (let i = 0; i < nbLines; i++) {
     let maxLength = 1;
     for (let k in data) {
-      if (Array.isArray(data[k][i]) && data[k][i].length > 0) maxLength = data[k][i].length;
+      if (Array.isArray(data[k][i]) && data[k][i].length > 0 && data[k][i].length > maxLength)
+        maxLength = data[k][i].length;
     }
     let lines = new Array(maxLength);
     for (var j = 0; j < lines.length; j++) {
