@@ -1,0 +1,5 @@
+{
+  "access_token": "",
+  "pattern": "https://api.conditor.fr/v1/records/:id/tei",
+  "output": "./out/conditor"
+}

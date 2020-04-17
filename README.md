@@ -1,6 +1,6 @@
 # co-harvester
 
-Harverster compatible avec l'API Conditor. Il peut faire une simple requête ou effectuer un scroll (récupération de corpus)
+Harverster compatible avec de multiple API. Il peut faire une simple requête ou effectuer un scroll (récupération d'une succession de requêtes)
 
 ## Installation ##
 
@@ -10,96 +10,71 @@ npm install
 
 ## Prérequis ##
 
-Le token d'authentification est nécessaire pour pouvoir accèder à l'API Conditor.
-
-```bash
-# export variable
-export CONDITOR_TOKEN="myToken";
-# pass variable to process node
-env CONDITOR_TOKEN="myToken" node index.js
-node index.js --token="myToken" --query="http://api.conditor.fr/v1/records?q=%22*%22"
-# set token into conditor query url
-node index.js  --query="http://api.conditor.fr/v1/records?q=%22*%22&access_token=myToken"
-```
+Un fichier de configuration pour la source à moissonner (exemples dans conf/*.json)
 
 ## Help ##
 
 ```bash
 node index.js --help
-```
 
-### Liste des paramètres disponibles pour l'API conditor ###
+Usage: index [options]
 
+Options:
+  --source <source>  required  targetted source (hal|conditor|crossref|pubmed)
+  --query <query>    required   API query
+  --ids <ids>        optionnal  path of file containing ids (one id by line)
+  --conf <conf>      optionnal  conf path
+  --limit <limit>    optionnal  number of file(s) downloaded simultaneously
+  --quiet            optionnal  quiet mode
+  -h, --help         output usage information
 
-```bash
---query="a valid conditor query url"
-```
+Usages exemples: https://github.com/conditor-project/co-harvester
 
-Consultez [la documentation de l'API](https://github.com/conditor-project/api) pour plus d'informations.
+More infos about [CONDITOR API] here: https://github.com/conditor-project/api/blob/master/doc/records.md
+More infos about [CROSSREF API] here: https://github.com/CrossRef/rest-api-doc
+More infos about [HAL API] here: http://api.archives-ouvertes.fr/docs
+More infos about [PUBMED API] here: https://www.ncbi.nlm.nih.gov/books/NBK25501/
 
-### Liste des autres paramètres du harvester ###
-
-```bash
---output --criteria --format
-```
-
-Le paramètre `output` permet de définir le chemin du fichier de sortie. Par défaut : `"./scroll.out"`
-
-```bash
---output="myPath" # Chemin du fichier de sortie.
-```
-
-***Note : Il est recommandé d'utiliser la sortie brute de l'API puis de manipuler les données avec ses propres scripts.***
-***Ces fonctionnalités ne peuvent pas traiter de gros volumes de données, il est donc conseillé de limiter les données renvoyées par l'API grâce aux paramètres includes/excludes*** 
-
-Par défaut, le résultat brut de l'API est renvoyé par le harvester.
-Il est possible d'eefectuer de simple reformatage avec les options : `--format` et `--criteria`.
-
-Le paramètre `criteria` doit obligatoirement être [une des valeurs suivantes](https://github.com/conditor-project/api/blob/master/doc/recordFields.md)
-
-```bash
---criteria="doi" # Critère utilisé pour regrouper les 'hits' entre eux (ex: doi, issue, halId, etc).
-```
-
-Le paramètre `format` permet de modifier la structure du résultat d'un scroll.
-
-```bash
---format="object" # Résultat sous la forme d'objet (regroupé par 'criteria' de même valeur)
---format="array" # Résultat sous la forme d'un tableau (regroupé par 'criteria' de même valeur)
---format="list" # Résultat sous la forme d'une liste (dédoublonnée) de toutes les valeurs de 'criteria' (ex : liste des doi)
 ```
 
 ## Exemples ##
 
-Récupérer tous les documents ayant un doi (scroll) :
+### Conditor ###
 
 ```bash
-# localhost
-node index.js --query="http://localhost:63332/v1/records?q=%22doi:*%22&page_size=1000&includes=doi&scroll=1m" --scroll
-# serveur distant
-node index.js --query="https://api.conditor.fr/v1/records?q=%22doi:*%22&page_size=1000&includes=doi&scroll=1m" --token="myToken" --scroll
+# query sur localhost (= un fichier .json)
+node index.js --query="http://localhost:63332/v1/records?q=%22doi:*%22&page_size=1000&includes=doi&scroll=1m" --source=conditor
+# query sur un serveur distant (= un fichier .json)
+node index.js --query="https://api.conditor.fr/v1/records?q=%22doi:*%22&page_size=1000&includes=doi&scroll=1m" --source=conditor
+# liste d'ids sur un serveur distant (= un fichier .gz avec un fichier par id)
+node index.js --ids=ids/conditor.txt --conf=conf/conditor.json --source=conditor
+# Traiter un fichier .json pour en extraire un corpus de document
+node tools/extractFiles.js --input="out/conditor.json" --output="out/conditor.gz" --data="teiBlob" --id="idConditor" --ext=".tei"
 ```
 
-Récupérer la liste des doi (scroll) :
+### Crossref ###
 
 ```bash
-node index.js --query="http://localhost:63332/v1/records?q=%22doi:*%22&page_size=1000&includes=doi&scroll=1m" --format="list" --criteria="doi"
+# liste d'ids sur un serveur distant (= un fichier .gz avec un fichier par id)
+node index.js --ids=ids/crossref/doi_wos_2014.txt --conf=conf/crossref.json --source=crossref
 ```
 
-Récupérer le nombre de documents ayant un doi ([aggrégations](https://github.com/conditor-project/api/blob/master/doc/aggregations.md)) :
+### Pubmed ###
 
 ```bash
-node index.js --query="http://localhost:63332/v1/records?q=%22doi:*%22&aggs=cardinality:doi.normalized&page_size=0"
+# query sur localhost (= un fichier .gz avec un fichier par document)
+node index.js --query="http://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&term=2017[DP] AND FRANCE[Affiliation]&usehistory=y&retmode=json&retmax=1000" --source=pubmed
 ```
 
-## Script ##
+**NOTE : Pour la source Pubmed, une query renverra un corpus de document XML**
 
-### scrollToCSV.js ###
-
-Construire un fichier CSV à partir du résultat d'un scroll (JSON renvoyé par l'API)
-
-***Génère une ligne par document puis une ligne supplémentaire pour chacun de ses duplicates/nearDuplicates/nearDuplicatesDetectedBySimilarity***
+### Hal ###
 
 ```bash
-node scripts/scrollToCSV.js --input scroll.out --fields "sourceUid,idConditor,duplicates.source,duplicates.idConditor,nearDuplicates.source,nearDuplicates.idConditor,nearDuplicatesDetectedBySimilarity.source,nearDuplicatesDetectedBySimilarity.idConditor,idChain" > scroll.csv
+# query sur un serveur distant (= un fichier .json)
+node index.js --query="https://api.archives-ouvertes.fr/search/?wt=json&q=structCountry_s:(fr OR gf OR gp OR mq OR re OR yt OR bl OR mf OR pf OR pm OR wf OR nc)&fq=producedDateY_i:2014&fl=docid,halId_s,label_xml&sort=docid+desc&rows=1000&cursorMark=*" --source=hal
+# query sur un serveur distant (= un fichier .json)
+node index.js --query="http://api.archives-ouvertes.fr/ref/structure?fq=country_s:fr&fl=*&q=*&rows=1000&sort=docid asc&cursorMark=*" --source=hal
+# Traiter un fichier .json pour en extraire un corpus de document
+node tools/extractFiles.js --input="out/hal.json" --output="out/hal.gz" --data="label_xml" --id="docid" --ext=".xml"
 ```

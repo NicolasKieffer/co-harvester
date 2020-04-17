@@ -5,28 +5,33 @@
 "use strict";
 
 const fetch = require("node-fetch"),
-  url = require("url"),
   fs = require("fs"),
-  path = require("path"),
-  cliProgress = require("cli-progress"),
+  url = require("url"),
   program = require("commander"),
   colors = require("colors/safe");
 
+const Conditor = require("./lib/conditor.js"),
+  Crossref = require("./lib/crossref.js"),
+  Pubmed = require("./lib/pubmed.js"),
+  Hal = require("./lib/hal.js"),
+  utils = require("./lib/utils.js");
+
+const defaultConfig = {
+  conditor: require("./conf/conditor.json"),
+  crossref: require("./conf/crossref.json"),
+  pubmed: require("./conf/pubmed.json"),
+  hal: require("./conf/hal.json")
+};
+
 program
-  .requiredOption("--query <query>", colors.yellow(colors.bold("required")) + "   conditor query")
-  .option("--token <token>", colors.gray(colors.bold("optionnal")) + "  authentication token")
-  .option("--scroll", colors.gray(colors.bold("optionnal")) + "  scroll mode")
-  .option(
-    "--criteria <criteria>",
-
-    colors.gray(colors.bold("optionnal")) + "  property used to regroup results"
+  .requiredOption(
+    "--source <source>",
+    colors.yellow(colors.bold("required")) + "  targetted source (hal|conditor|crossref|pubmed)"
   )
-  .option(
-    "--format <object|array|list>",
-
-    colors.gray(colors.bold("optionnal")) + "  format used to modify structure of API results"
-  )
-  .option("--output <output>", colors.gray(colors.bold("optionnal")) + "  output file path", "./scroll.out")
+  .option("--query <query>", colors.yellow(colors.bold("required")) + "   API query")
+  .option("--ids <ids>", colors.gray(colors.bold("optionnal")) + "  path of file containing ids (one id by line)")
+  .option("--conf <conf>", colors.gray(colors.bold("optionnal")) + "  conf path")
+  .option("--limit <limit>", colors.gray(colors.bold("optionnal")) + "  number of file(s) downloaded simultaneously")
   .option("--quiet", colors.gray(colors.bold("optionnal")) + "  quiet mode")
   .on("--help", function() {
     console.log("");
@@ -35,7 +40,13 @@ program
     console.log(
       colors.green(
         colors.bold(
-          "More infos about [CONDITOR API] here: https://github.com/conditor-project/api/blob/master/doc/records.md"
+          "More infos about [CONDITOR API] here: https://github.com/conditor-project/api/blob/master/doc/records.md" +
+            "\n" +
+            "More infos about [CROSSREF API] here: https://github.com/CrossRef/rest-api-doc" +
+            "\n" +
+            "More infos about [HAL API] here: http://api.archives-ouvertes.fr/docs" +
+            "\n" +
+            "More infos about [PUBMED API] here: https://www.ncbi.nlm.nih.gov/books/NBK25501/"
         )
       )
     );
@@ -43,146 +54,72 @@ program
   })
   .parse(process.argv);
 
-// create a new progress bar instance and use shades_classic theme
-const mainProgress = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
+let query = typeof program.query !== "undefined" ? program.query : undefined,
+  source = typeof program.source !== "undefined" ? program.source : undefined,
+  ids = typeof program.ids !== "undefined" ? fs.readFileSync(program.ids, "utf8").split("\n") : undefined,
+  conf = typeof program.conf !== "undefined" ? JSON.parse(fs.readFileSync(program.conf)) : {},
+  opts = typeof program.limit !== "undefined" ? { limit: program.limit } : undefined,
+  harvester,
+  data,
+  method,
+  callback;
 
-let query = program.query,
-  api = new URL(query),
-  token = api.searchParams.get("access_token"),
-  criteria = program.criteria,
-  format = program.format,
-  output = program.output,
-  result = [],
-  outputFormat = {
-    object: function(data, criteria, stringify = true) {
-      let result = {};
-      for (var i = 0; i < data.length; i++) {
-        if (typeof result[data[i][criteria]] === "undefined") result[data[i][criteria]] = [];
-        result[data[i][criteria]].push(data[i]);
-      }
-      if (stringify) return JSON.stringify(result);
-      else return result;
-    },
-    array: function(data, criteria, stringify = true) {
-      let hits = outputFormat.object(data, criteria, false),
-        result = [];
-      for (let key in hits) {
-        result.push(data[i]);
-      }
-      if (stringify) return JSON.stringify(result);
-      else return result;
-    },
-    list: function(data, criteria, stringify = true) {
-      let result = Object.keys(outputFormat.object(data, criteria, false));
-      if (stringify) return result.join("\n");
-      else return result;
-    }
-  };
-
-if (typeof format !== "undefined" && typeof outputFormat[format] !== "function")
-  throw new Error(colors.red("invalid --format. Available values are: object OR array OR list"));
-
-// Token initialisation
-if (!token) {
-  log("Token not found in --query");
-  if (program.token) {
-    log("Token provided by --token");
-    token = program.token;
-  } else {
-    log("Token not found in --token");
-    if (process.env.CONDITOR_TOKEN) {
-      log("Token provided by ENV $CONDITOR_TOKEN");
-      token = process.env.CONDITOR_TOKEN;
-    } else log("Token not found in ENV $CONDITOR_TOKEN");
-  }
-  api.searchParams.set("access_token", token);
-}
-
-function harvest(target) {
-  log("Request API...");
-  log(target);
-  return fetch(target, {
-    headers: { "Content-Type": "application/json" }
-  })
-    .then(checkStatus)
-    .then(function(res) {
-      log("done.");
-      let scrollId = res.headers.get("scroll-id"),
-        count = +res.headers.get("x-result-count"),
-        total = +res.headers.get("x-total-count");
-      return res.json().then(function(data) {
-        if (!program.scroll) return console.log(data);
-        else {
-          log("Harvesting API...");
-          if (!program.quiet) mainProgress.start(total, count);
-          result = result.concat(data);
-          return _scroll(scrollId, count).catch(function(err) {
-            throw err;
-          });
-        }
-      });
-    });
-}
-
-function _scroll(scrollId, previousCount = 0) {
-  let target = buildScrollUrl(scrollId);
-  return fetch(target, {
-    headers: { "Content-Type": "application/json" }
-  })
-    .then(checkStatus)
-    .then(function(res) {
-      let id = res.headers.get("scroll-id"),
-        count = previousCount + +res.headers.get("x-result-count"),
-        total = +res.headers.get("x-total-count");
-      if (!program.quiet) mainProgress.update(count);
-      return res.json().then(function(data) {
-        result = result.concat(data);
-        if (total > count) return _scroll(id, count);
-        else {
-          if (!program.quiet) mainProgress.stop();
-          log("done.");
-          let data = JSON.stringify(result);
-          if (typeof outputFormat[format] === "function") data = outputFormat[format](result, criteria);
-          return writeResult(output, data);
-        }
-      });
-    });
-}
-
-function checkStatus(res) {
-  if (res.status >= 200 && res.status < 300) {
-    return res;
-  } else {
-    let err = new Error("httpStatusException");
-    err.name = "httpStatusException";
-    err.status = res.status;
-    err.message = "API respond with status " + res.status;
-    err.res = res;
-    throw err;
-  }
-}
-
-function writeResult(output, data, callback) {
-  log("Wrinting data into : " + output + " ...");
-  return fs.writeFile(output, data, "utf8", function(err) {
-    if (err) throw err;
-    log("done.");
-    if (typeof callback === "function") return callback();
-  });
-}
-
-function buildScrollUrl(scrollId) {
-  let result = url.resolve(api.href.split("records")[0], "scroll/" + scrollId) + "?access_token=" + token;
-  return result;
-}
-
-function log(str) {
-  if (!program.quiet) console.log(str);
-}
-
-harvest(api.href).catch(function(err) {
-  if (err.name === "httpStatusException") {
-    console.log(colors.red(err.message));
-  } else console.log(err);
+if (source !== "hal" && source !== "conditor" && source !== "crossref" && source !== "pubmed") {
+  console.log("available values of --source parameter : hal|conditor|crossref|pubmed");
   process.exit();
-});
+} else conf = Object.assign({}, defaultConfig[source], conf);
+
+if (typeof query !== "undefined" && typeof ids === "undefined") {
+  if (source === "conditor" || source === "hal") {
+    data = query;
+    conf.output = conf.output + ".json";
+    method = "requestByQuery";
+    callback = function(err, res) {
+      if (typeof res !== "undefined") console.log(res);
+      if (err) process.exit();
+    };
+  } else if (source === "pubmed") {
+    data = query;
+    conf.output = conf.output + ".gz";
+    method = "requestByQuery";
+    callback = function(err, res) {
+      if (typeof res !== "undefined") console.log(res);
+      if (err) process.exit();
+    };
+  } else {
+    console.log("Not available yet for this source.");
+    process.exit();
+  }
+} else if (typeof query === "undefined" && typeof ids !== "undefined") {
+  if (source === "conditor" || "crossref") {
+    data = ids;
+    conf.output = conf.output + ".gz";
+    method = "requestByIds";
+    callback = function(err, res) {
+      if (typeof res !== "undefined") console.log(res);
+      if (err) process.exit();
+    };
+  } else {
+    console.log("Not available yet for this source.");
+    process.exit();
+  }
+} else {
+  console.log("invalid parameters : you must use '--query' OR '--ids' parameter");
+  console.log("available :");
+  console.log("node index.js --query=myQuery");
+  console.log("or");
+  console.log("node index.js --ids=/path/to/my/ids.txt # file containing one id by line");
+  process.exit();
+}
+
+if (source === "hal") {
+  harvester = new Hal(conf);
+} else if (source === "conditor") {
+  harvester = new Conditor(conf);
+} else if (source === "crossref") {
+  harvester = new Crossref(conf);
+} else if (source === "pubmed") {
+  harvester = new Pubmed(conf);
+}
+
+harvester[method](data, callback, opts);
