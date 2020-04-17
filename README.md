@@ -68,7 +68,7 @@ node index.js --query="http://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi
 
 **NOTE : Pour la source Pubmed, une query renverra un corpus de document XML**
 
-### Hal ###
+### Hal ###
 
 ```bash
 # query sur un serveur distant (= un fichier .json)
