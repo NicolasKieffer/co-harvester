@@ -8,6 +8,8 @@ Harverster compatible avec de multiple API. Il peut faire une simple requête ou
 npm install
 ```
 
+_**Note : need at least Node v10.x.x**_
+
 ## Prérequis ##
 
 Un fichier de configuration pour la source à moissonner (exemples dans conf/*.json)
