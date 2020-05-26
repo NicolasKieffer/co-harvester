@@ -12,7 +12,7 @@ _**Note : need at least Node v10.x.x**_
 
 ## Prérequis ##
 
-Un fichier de configuration pour la source à moissonner (exemples dans conf/*.json)
+Un fichier de configuration pour la source à moissonner (exemples dans conf/*.json) **lorsqu'un fichier d'id(s) est utilisé**. Sinon, ce sont les paramètres passés en ligne de commande qui seront utilisés.
 
 ## Help ##
 
