@@ -10,6 +10,35 @@ npm install
 
 _**Note : need at least Node v10.x.x**_
 
+Si vous avez ce genre d'erreur, cela peut venir de la version de node qui n'est pas assez récente.
+
+```js
+ReferenceError: URL is not defined
+    at Hal.requestByQuery (/home/cuxac/Documents/conditor/co-harvester/lib/hal.js:28:18)
+    at Object.<anonymous> (/home/cuxac/Documents/conditor/co-harvester/index.js:125:18)
+    at Module._compile (module.js:635:30)
+    at Object.Module._extensions..js (module.js:646:10)
+    at Module.load (module.js:554:32)
+    at tryModuleLoad (module.js:497:12)
+    at Function.Module._load (module.js:489:3)
+    at Function.Module.runMain (module.js:676:10)
+    at startup (bootstrap_node.js:187:16)
+    at bootstrap_node.js:608:3
+```
+
+Pour *réparer* ce bug, il faut passer à une version de nodejs supérieur ou égale à 10 :
+
+```bash
+node --version # should print at least v10.x
+
+# install via nodejs : https://nodejs.org/dist/latest-v10.x/ 
+
+# install via nvm
+nvm install 10
+nvm use 10
+nvm alias default 10 # mettre la version 10 de node par défaut
+```
+
 ## Prérequis ##
 
 Un fichier de configuration pour la source à moissonner (exemples dans conf/*.json) **lorsqu'un fichier d'id(s) est utilisé**. Sinon, ce sont les paramètres passés en ligne de commande qui seront utilisés.
