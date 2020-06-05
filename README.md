@@ -14,8 +14,8 @@ Si vous avez ce genre d'erreur, cela peut venir de la version de node qui n'est 
 
 ```js
 ReferenceError: URL is not defined
-    at Hal.requestByQuery (/home/cuxac/Documents/conditor/co-harvester/lib/hal.js:28:18)
-    at Object.<anonymous> (/home/cuxac/Documents/conditor/co-harvester/index.js:125:18)
+    at Hal.requestByQuery (/xxx/co-harvester/lib/hal.js:28:18)
+    at Object.<anonymous> (/xxx/co-harvester/index.js:125:18)
     at Module._compile (module.js:635:30)
     at Object.Module._extensions..js (module.js:646:10)
     at Module.load (module.js:554:32)
