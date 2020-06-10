@@ -72,7 +72,7 @@ More infos about [PUBMED API] here: https://www.ncbi.nlm.nih.gov/books/NBK25501/
 
 **Note : Pour les moissonnages via liste d'ids, c'est le fichier de configuration qui est utilisé (et non plus les paramètres passer en ligne de commande)**
 
-**Exemple : pour préciser l'output, ~~--output~~ -> --conf=conf.json (propriété output du fichier)**
+**Dans ce cas : pour préciser l'output, ~~--output~~ -> --conf=conf.json (propriété output du fichier)**
 
 ### Conditor ###
 
