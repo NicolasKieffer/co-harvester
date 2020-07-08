@@ -1,6 +1,6 @@
 {
   "name": "co-harvester",
-  "version": "1.0.0",
+  "version": "3.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -17,6 +17,7 @@
     "fast-xml-parser": "^3.16.0",
     "lodash": "^4.17.15",
     "node-fetch": "^2.6.0",
+    "proxy-agent": "^3.1.1",
     "stream-json": "^1.3.3",
     "xmlsplit": "^1.2.8"
   }

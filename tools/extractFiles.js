@@ -14,10 +14,11 @@ program
   .requiredOption("--output <output>", colors.yellow(colors.bold("required")) + "  output file")
   .requiredOption("--data <data>", colors.yellow(colors.bold("required")) + "  data selector (path in JSON object)")
   .requiredOption(
-    "--ext <ext>",
+    "--format <format>",
     colors.yellow(colors.bold("required")) + "  output files extension (.xml, .tei, .txt, etc)"
   )
-  .option("--id <id>", colors.gray(colors.bold("required")) + "  id selector (path in JSON object)")
+  .requiredOption("--ext <ext>", colors.yellow(colors.bold("required")) + "  archive format (.zip or .gz)")
+  .requiredOption("--id <id>", colors.yellow(colors.bold("required")) + "  id selector (path in JSON object)")
   .parse(process.argv);
 
 try {
@@ -30,20 +31,36 @@ try {
   }
 }
 
-const jsonStream = StreamArray.withParser(),
-  outStream = fs.createWriteStream(program.output, { flags: "a" }),
-  archive = archiver("zip", {
-    zlib: { level: 9 } // Sets the compression level.
-  });
+let archive;
 
-outStream.on("close", function() {
+if (program.ext !== "zip" && program.ext !== "gz") {
+  console.log("available values of --ext parameter : zip|gz");
+  process.exit();
+} else {
+  if (program.ext !== "zip")
+    archive = archiver("zip", {
+      zlib: { level: 9 } // Sets the compression level.
+    });
+  else if (program.ext !== "gz")
+    archive = archiver("tar", {
+      gzip: true,
+      gzipOptions: {
+        level: 1
+      }
+    });
+}
+
+const jsonStream = StreamArray.withParser(),
+  outStream = fs.createWriteStream(program.output, { flags: "a" });
+
+outStream.on("close", function () {
   console.log(archive.pointer() + " total bytes");
 });
 
 jsonStream.on("data", ({ key, value }) => {
   let data = _.get(value, program.data, ""),
     id = program.id ? _.get(value, program.id, key) : key;
-  archive.append(Buffer.from(data.toString(), "utf8"), { name: id + program.ext });
+  archive.append(Buffer.from(data.toString(), "utf8"), { name: id + program.format });
 });
 
 jsonStream.on("end", () => {

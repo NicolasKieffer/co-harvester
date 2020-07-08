@@ -3,3 +3,4 @@ package-lock.json
 out/*.gz
 out/*.log
 out/*.json
+out/*

@@ -1,6 +1,5 @@
 {
   "usr": "",
   "pwd": "",
-  "pattern": "https://api.crossref.org/works/:id.xml",
-  "output": "./out/crossref"
+  "pattern": "https://api.crossref.org/works/:id.xml"
 }
