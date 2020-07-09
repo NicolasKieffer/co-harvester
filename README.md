@@ -41,7 +41,7 @@ nvm alias default 10 # mettre la version 10 de node par défaut
 
 ## Prérequis ##
 
-Un fichier de configuration pour la source à moissonner (exemples dans conf/*.json) **lorsqu'un fichier d'id(s) est utilisé**. Sinon, ce sont les paramètres passés en ligne de commande qui seront utilisés.
+Un fichier de configuration pour la source à moissonner (exemples dans conf/\*.json) **lorsqu'un fichier d'id(s) est utilisé**. Sinon, ce sont les paramètres passés en ligne de commande qui seront utilisés.
 
 ## Help ##
 
@@ -82,47 +82,9 @@ Il est possible de configurer le harvester pour qu'il fonctionne derrière un pr
 --proxy="https://mon.proxy.com"
 ```
 
-## Fonctionnement ##
+## Usages ##
 
-### Liste d'ids ###
-
-Liste des paramètres à renseigner :
-
-* --ids
-* --source
-* --output
-* --ext
-* --conf
-
-Note : Pour le moissonnage via liste d'ids, c'est un fichier de configuration qui est utilisé pour passer l'ensemble des paramètres liés à l'API interrogée : --conf=conf.json
-
-Exemple de fichier :
-
-```json
-{
-  "access_token": "monToken",
-  "pattern": "https://api.conditor.fr/v1/records/:id/tei"
-}
-```
-De cette manière, les données utilisées seront :
-
-* le token : "monToken"
-* le pattern : "https://api.conditor.fr/v1/records/**:id**/tei"
-
-### Query ###
-
-Liste des paramètres à renseigner :
-
-* --query
-* --source
-* --output
-* _--ext*_
-
-Note : Pour le moissonnage via query, toutes les données nécessaires doivent être présentes dans l'URL de --query
-
-_* Pour la source Pubmed, une query renvoie un corpus de document XML. Il faut alors préciser le format souhaité pour l'archive_
-
-## Exemples ##
+Voici des exemples d'usages (les plus courants) pour chaque source disponible ([plus de détails ici](#fonctionnement)) :
 
 ### Conditor ###
 
@@ -149,15 +111,6 @@ node tools/extractFiles.js --input="out/conditor.json" --output="out/conditor.gz
 node index.js --ids="ids/crossref/doi_wos_2014.txt" --conf="conf/crossref.json" --source="crossref" --output="out/crossref" --ext="gz"
 ```
 
-### Pubmed ###
-
-```bash
-# query sur localhost (= un fichier .gz/.zip avec un fichier par document)
-node index.js --query="http://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&term=2017[DP] AND FRANCE[Affiliation]&usehistory=y&retmode=json&retmax=1000" --source="pubmed" --output="out/pubmed" --ext="gz"
-```
-
-**NOTE : Pour la source Pubmed, une query renverra un corpus de document XML**
-
 ### Hal ###
 
 ```bash
@@ -170,4 +123,108 @@ node index.js --query="http://api.archives-ouvertes.fr/ref/structure?fq=country_
 node tools/extractFiles.js --input="out/hal.json" --output="out/hal.gz" --data="label_xml" --id="docid" --ext="gz" --format=".xml"
 # Plus d'infos avec la commande :
 # node tools/extractFiles.js --help
+```
+
+### Pubmed ###
+
+```bash
+# query sur localhost (= un fichier .gz/.zip avec un fichier par document)
+node index.js --query="http://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&term=2017[DP] AND FRANCE[Affiliation]&usehistory=y&retmode=json&retmax=1000" --source="pubmed" --output="out/pubmed" --ext="gz"
+```
+
+Note : Pour la source Pubmed, une query renvoie un corpus de document XML
+
+## Fonctionnement ##
+
+### Moissonnage via liste d'ids ###
+
+Liste des paramètres à renseigner :
+
+* --ids
+* --source
+* --output
+* --ext
+* --conf
+
+Note : Pour le moissonnage via liste d'ids, c'est un fichier de configuration qui est utilisé pour passer l'ensemble des paramètres liés à l'API interrogée : --conf=conf.json
+
+#### Exemples de fichier ####
+
+##### Conditor #####
+
+```json
+{
+  "access_token": "monToken",
+  "pattern": "https://api.conditor.fr/v1/records/:id/tei"
+}
+```
+De cette manière, les données utilisées seront :
+
+* le token : "monToken"
+* le pattern : "https://api.conditor.fr/v1/records/**:id**/tei"
+
+
+##### CrossRef #####
+
+```json
+{
+  "userAgent": "",
+  "usr": "",
+  "pwd": "",
+  "pattern": "https://api.crossref.org/works/:id.xml"
+}
+```
+De cette manière, les données utilisées seront :
+
+* le usr : user (facultatif)
+* le pwd : password (facultatif)
+* le pattern : "https://api.crossref.org/works/**:id**.xml"
+* le userAgent: [User-Agent pour CrossRef](https://github.com/CrossRef/rest-api-doc#etiquette)
+
+##### Hal #####
+
+_Moissonnage via liste d'ids non-implémenté._
+
+##### Pubmed #####
+
+_Moissonnage via liste d'ids non-implémenté._
+
+### Moissonnage via query ###
+
+Liste des paramètres à renseigner :
+
+* --query
+* --source
+* --output
+* _--ext *_
+
+Note : Pour le moissonnage via query, toutes les données nécessaires doivent être présentes dans l'URL de --query
+
+_* Pour la source Pubmed, une query renvoie un corpus de document XML. Il faut alors préciser le format souhaité pour l'archive_
+
+
+#### Exemples de query ####
+
+##### Conditor #####
+
+```bash
+"https://api.conditor.fr/v1/records?q=%22doi:*%22&page_size=1000&includes=doi&scroll=1m"
+```
+
+##### CrossRef #####
+
+_Moissonnage via query non-implémenté._
+
+##### Hal #####
+
+```bash
+"https://api.archives-ouvertes.fr/search/?wt=json&q=structCountry_s:(fr OR gf OR gp OR mq OR re OR yt OR bl OR mf OR pf OR pm OR wf OR nc)&fq=producedDateY_i:2014&fl=docid,halId_s,label_xml&sort=docid+desc&rows=1000&cursorMark=*"
+
+"http://api.archives-ouvertes.fr/ref/structure?fq=country_s:fr&fl=*&q=*&rows=1000&sort=docid asc&cursorMark=*"
+```
+
+##### Pubmed #####
+
+```bash
+"http://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&term=2017[DP] AND FRANCE[Affiliation]&usehistory=y&retmode=json&retmax=1000"
 ```

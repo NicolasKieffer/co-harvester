@@ -1,4 +1,5 @@
 {
+  "userAgent": "",
   "usr": "",
   "pwd": "",
   "pattern": "https://api.crossref.org/works/:id.xml"
