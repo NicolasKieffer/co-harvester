@@ -161,7 +161,7 @@ Note : Pour le moissonnage via liste d'ids, c'est un fichier de configuration qu
 De cette manière, les données utilisées seront :
 
 * le token : "monToken"
-* le pattern : "https://api.conditor.fr/v1/records/**:id**/tei"
+* le pattern : "https://api.conditor.fr/v1/records/:id/tei"
 
 
 ##### CrossRef #####
@@ -178,7 +178,7 @@ De cette manière, les données utilisées seront :
 
 * le usr : user (facultatif)
 * le pwd : password (facultatif)
-* le pattern : "https://api.crossref.org/works/**:id**.xml"
+* le pattern : "https://api.crossref.org/works/:id.xml"
 * le userAgent: [User-Agent pour CrossRef](https://github.com/CrossRef/rest-api-doc#etiquette)
 
 ##### Hal #####
