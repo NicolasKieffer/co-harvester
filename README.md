@@ -47,11 +47,12 @@ Un fichier de configuration pour la source à moissonner (exemples dans conf/\*.
 
 ```bash
 $ node index.js --help
+
 Usage: index [options]
 
 Options:
-  --source <source>  required  targetted source (hal|conditor|crossref|pubmed)
-  --query <query>    required   API query
+  --source <source>  required   targetted source (hal|conditor|crossref|pubmed)
+  --query <query>    optionnal  API query
   --ext <ext>        optionnal  archive extension (zip|gz)
   --proxy <proxy>    optionnal  set proxy url
   --ids <ids>        optionnal  path of file containing ids (one id by line)
@@ -67,7 +68,6 @@ More infos about [CONDITOR API] here: https://github.com/conditor-project/api/bl
 More infos about [CROSSREF API] here: https://github.com/CrossRef/rest-api-doc
 More infos about [HAL API] here: http://api.archives-ouvertes.fr/docs
 More infos about [PUBMED API] here: https://www.ncbi.nlm.nih.gov/books/NBK25501/
-
 ```
 
 ## Proxy ##

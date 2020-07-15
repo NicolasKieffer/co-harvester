@@ -27,9 +27,9 @@ const defaultConfig = {
 program
   .requiredOption(
     "--source <source>",
-    colors.yellow(colors.bold("required")) + "  targetted source (hal|conditor|crossref|pubmed)"
+    colors.yellow(colors.bold("required")) + "   targetted source (hal|conditor|crossref|pubmed)"
   )
-  .option("--query <query>", colors.yellow(colors.bold("required")) + "   API query")
+  .option("--query <query>", colors.gray(colors.bold("optionnal")) + "  API query")
   .option("--ext <ext>", colors.gray(colors.bold("optionnal")) + "  archive extension (zip|gz)")
   .option("--proxy <proxy>", colors.gray(colors.bold("optionnal")) + "  set proxy url")
   .option("--ids <ids>", colors.gray(colors.bold("optionnal")) + "  path of file containing ids (one id by line)")
