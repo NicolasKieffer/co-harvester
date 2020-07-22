@@ -1,8 +1,0 @@
-{
-  "access_token": "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE1OTQxMjgwODEsImV4cCI6MTU5NjcyMDA4MSwiaXNzIjoiY29uZGl0b3ItYXBpIiwic3ViIjoibWFpbHRvOnVzZXJAY29uZGl0b3IuZnIiLCJqdGkiOiJjWG5VQUdwQ2d4VzdLY05lZ0JMRXgifQ.i7c8L3Z62cnUCoM1l0ASyipGJzhfG4ml3yXaBon6i94wtZqOepfiMGypouapTECKkynbCifUzygitQydluulNA",
-  "pattern": "http://localhost:63332/v1/records/:id/reference",
-  "headers": {
-    "Content-Type": "application/json"
-  },
-  "fileExtension": ".json"
-}
