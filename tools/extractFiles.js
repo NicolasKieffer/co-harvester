@@ -17,7 +17,7 @@ program
     "--format <format>",
     colors.yellow(colors.bold("required")) + "  output files extension (.xml, .tei, .txt, etc)"
   )
-  .requiredOption("--ext <ext>", colors.yellow(colors.bold("required")) + "  archive format (.zip or .gz)")
+  .requiredOption("--archive <archive>", colors.yellow(colors.bold("required")) + "  archive format (.zip or .gz)")
   .requiredOption("--id <id>", colors.yellow(colors.bold("required")) + "  id selector (path in JSON object)")
   .parse(process.argv);
 
@@ -33,15 +33,15 @@ try {
 
 let archive;
 
-if (program.ext !== "zip" && program.ext !== "gz") {
-  console.log("available values of --ext parameter : zip|gz");
+if (program.archive !== "zip" && program.archive !== "gz") {
+  console.log("available values of --archive parameter : zip|gz");
   process.exit();
 } else {
-  if (program.ext !== "zip")
+  if (program.archive !== "zip")
     archive = archiver("zip", {
       zlib: { level: 9 } // Sets the compression level.
     });
-  else if (program.ext !== "gz")
+  else if (program.archive !== "gz")
     archive = archiver("tar", {
       gzip: true,
       gzipOptions: {

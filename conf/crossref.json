@@ -2,5 +2,9 @@
   "userAgent": "",
   "usr": "",
   "pwd": "",
-  "pattern": "https://api.crossref.org/works/:id.xml"
+  "pattern": "https://api.crossref.org/works/:id.xml",
+  "headers": {
+    "Content-Type": "application/xml"
+  },
+  "fileExtension": ".xml"
 }

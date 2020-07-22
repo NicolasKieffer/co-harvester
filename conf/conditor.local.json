@@ -1,4 +1,0 @@
-{
-  "access_token": "",
-  "pattern": "http://localhost:63332/v1/records/:id/tei"
-}
