@@ -1,6 +1,6 @@
 {
   "access_token": "",
-  "pattern": "https://api.conditor.fr/v1/records/:id/tei",
+  "pattern": "https://api.conditor.fr/v1/records/:id/reference",
   "headers": {
     "Content-Type": "application/json"
   },
