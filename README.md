@@ -1,6 +1,6 @@
 # co-harvester
 
-Harverster compatible avec de multiple API. Il peut faire une simple requête ou effectuer un scroll (récupération d'une succession de requêtes)
+Harverster compatible avec de multiples API. Il peut faire une simple requête ou effectuer un scroll (récupération d'une succession de requêtes)
 
 ## Installation ##
 
@@ -26,7 +26,7 @@ ReferenceError: URL is not defined
     at bootstrap_node.js:608:3
 ```
 
-Pour *réparer* ce bug, il faut passer à une version de nodejs supérieur ou égale à 10 :
+Pour *réparer* ce bug, il faut passer à une version de nodejs supérieure ou égale à 10 :
 
 ```bash
 node --version # should print at least v10.x
@@ -91,30 +91,30 @@ Voici des exemples d'usages (les plus courants) pour chaque source disponible ([
 
 ```bash
 # query sur localhost (= un fichier .json)
-node index.js --query="http://localhost:63332/v1/records?q=%22doi:*%22&page_size=1000&includes=doi&scroll=1m" --source="conditor" --output="out/conditor"
+node index.js --query="http://localhost:63332/v1/records?q=%22doi:*%22&page_size=1000&includes=doi&scroll&access_token=myToken=1m" --source="conditor" --output="out/conditor"
 # query sur un serveur distant (= un fichier .json)
-node index.js --query="https://api.conditor.fr/v1/records?q=%22doi:*%22&page_size=1000&includes=doi&scroll=1m" --source="conditor"  --output="out/conditor"
+node index.js --query="https://api.conditor.fr/v1/records?q=%22doi:*%22&page_size=1000&includes=doi&scroll=1m&access_token=myToken" --source="conditor"  --output="out/conditor"
 ```
 
 #### Récupération de la TEI via liste d'id(s) ####
 
 ```bash
-# Récupération du JSON via liste d'id(s) (= un fichier .gz/.zip avec un fichier TEI par id)
+# Récupération de la TEI via liste d'id(s) (= un fichier .gz/.zip avec un fichier TEI par id) ; le token est à mettre dans le fichier conditor.json dans le répertoire conf
 node index.js --ids="ids/conditor.txt" --conf="conf/conditor.json" --source="conditor" --output="out/conditor" --archive="gz"
 ```
 
 #### Récupération des notices de références via une liste d'id(s) ####
 
 ```bash
-# Récupération des notices de références via une liste d'id(s) (= un fichier .gz/.zip avec un fichier JSON par id)
+# Récupération des notices de références via une liste d'id(s) (= un fichier .gz/.zip avec un fichier JSON par id) ; ; le token est à mettre dans le fichier conditor.json dans le répertoire conf
 node index.js --ids="ids/conditor.txt" --conf="conf/conditor.reference.json" --source="conditor" --output="out/conditor.reference"
 ```
 
 #### Récupération des notices de références via une query ####
 
 ```bash
-# Récupération des notices de références via une query (= un fichier JSON permettant de récupérer le corpus de notice de référence)
-node index.js --query="https://api.conditor.fr/v1/records?q=%22doi:*%22&page_size=1000&includes=doi&scroll=1m" --source="conditor"  --output="out/conditor" --reference --conf="conf/conditor.reference.json"
+# Récupération des notices de références via une query (= un fichier JSON permettant de récupérer le corpus de notices de référence)
+node index.js --query="https://api.conditor.fr/v1/records?q=%22doi:*%22&page_size=1000&includes=doi&scroll=1m&access_token=myToken" --source="conditor"  --output="out/conditor" --reference --conf="conf/conditor.reference.json"
 ```
 
 **Note : il faut exécuter les deux lignes de commande générées par le harvester**
@@ -137,7 +137,7 @@ node index.js --source=conditor --ids=out/conditor.reference.ids.txt --output=ou
 #### Utilisation des scripts de manipulation de données ####
 
 ```bash
-# Traiter un fichier .json pour en extraire un corpus de document
+# Traiter un fichier .json pour en extraire un corpus de documents
 node tools/extractFiles.js --input="out/conditor.json" --output="out/conditor.gz" --data="teiBlob" --id="idConditor" --archive="gz" --format=".tei"
 # Le fichier JSON doit contenir la valeur idConditor ET teiBlob
 # Plus d'infos avec la commande :
@@ -182,7 +182,7 @@ node tools/extractFiles.js --input="out/hal.json" --output="out/hal.gz" --data="
 node index.js --query="http://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&term=2017[DP] AND FRANCE[Affiliation]&usehistory=y&retmode=json&retmax=1000" --source="pubmed" --output="out/pubmed" --archive="gz"
 ```
 
-Note : Pour la source Pubmed, une query renvoie un corpus de document XML
+Note : Pour la source Pubmed, une query renvoie un corpus de documents XML
 
 ## Fonctionnement ##
 
