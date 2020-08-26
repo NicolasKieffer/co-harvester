@@ -159,9 +159,9 @@ node index.js --ids="ids/crossref/doi_wos_2014.txt" --conf="conf/crossref.json" 
 
 ```bash
 # Récupération du JSON via query (= un fichier .json)
-node index.js --query="https://api.archives-ouvertes.fr/search/?wt=json&q=structCountry_s:(fr OR gf OR gp OR mq OR re OR yt OR bl OR mf OR pf OR pm OR wf OR nc)&fq=producedDateY_i:2014&fl=docid,halId_s,label_xml&sort=docid+desc&rows=1000&cursorMark=*" --source="hal" --output="out/pubmed"
+node index.js --query="https://api.archives-ouvertes.fr/search/?wt=json&q=structCountry_s:(fr OR gf OR gp OR mq OR re OR yt OR bl OR mf OR pf OR pm OR wf OR nc)&fq=producedDateY_i:2014&fl=docid,halId_s,label_xml&sort=docid+desc&rows=1000&cursorMark=*" --source="hal" --output="out/hal"
 # Récupération du JSON via query (= un fichier .json)
-node index.js --query="http://api.archives-ouvertes.fr/ref/structure?fq=country_s:fr&fl=*&q=*&rows=1000&sort=docid asc&cursorMark=*" --source="hal" --output="out/pubmed"
+node index.js --query="http://api.archives-ouvertes.fr/ref/structure?fq=country_s:fr&fl=*&q=*&rows=1000&sort=docid asc&cursorMark=*" --source="hal" --output="out/hal"
 ```
 
 #### Récupération du XML présent dans le JSON récupéré via query ####
